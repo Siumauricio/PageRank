@@ -10,9 +10,12 @@ using namespace std;
 
 class Archivo {
 public:
-	void LeerArchivo (string, vector<string>, int,int,ListaEnlazada&);
+	//Archivo ();
+	void LeerArchivo (string, vector<string>, int,int);
 	int cantidadHREF (string);
+	bool existePagina (string);
 	vector<string> extraerPaginas (string);
+	void eiminarDuplicados (string pagina,int contador,ListaEnlazada &);
 private:
 	//ListaEnlazada ls;
 	bool activo = true;
