@@ -10,19 +10,19 @@ int main () {
 	vector<string>lista3;
 	vector<string>ls2;
 	ListaEnlazada ls;
-	NodoPagina *page = new NodoPagina ();
 	NodoPagina *page2 = new NodoPagina ();
-	a.LeerArchivo ("google.html",lista3,0,a.cantidadHREF ("google.html"),ls);
-	//lista = a.extraerPaginas ("Photos");
-
-	for( int i = 0; i<lista.size (); i++ ) {
-		
-		//cout<<lista[i]<<endl;
+	lista = a.extraerPaginas ("Photos");
+	for(int i = 0; i < lista.size (); i++) {
+		a.LeerArchivo (lista[i],lista3,0,a.cantidadHREF (lista[i]));
+		cout << lista[i] << endl;
 	}
-	ls.ImprimirLista ();
-	cout << endl<<"-------------------------------------------" << endl;
+	a.eiminarDuplicados (lista[0],0,ls);
+     //ls.ImprimirLista ();
+	cout << endl << "-------------------------------------------" << endl;
 	ls.calcularRef (nullptr,ls2);
-	cout << "-------------------------------------------" << endl;
 	ls.AjustarPR (page2,ls2,0,0);
+	cout << endl << "-------------------------------------------" << endl;
 	ls.ImprimirPR ();
+	cout << "-------------------------------------------" << endl;
+
 }
