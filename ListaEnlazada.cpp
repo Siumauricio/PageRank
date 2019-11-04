@@ -6,14 +6,10 @@ using namespace std;
 
 ListaEnlazada::ListaEnlazada (void):abajo (nullptr),primero (nullptr) {}
 
-ListaEnlazada::~ListaEnlazada () {
-	delete primero;
-	delete abajo;
-}
-
 bool ListaEnlazada::estaVacia () {
 	return abajo == nullptr;
 }
+
 void ListaEnlazada::Anadir (string Nombre) {
 	NodoPagina *nuevo = new NodoPagina (0,Nombre,nullptr,nullptr,0);
 	Archivo a;
@@ -32,14 +28,14 @@ void ListaEnlazada::Anadir (string Nombre) {
 	} else {
 		if(contador < cantHREF) {
 			NodoRedirect *actual = abajo;
-			while((NodoRedirect *)actual->siguiente != nullptr) {
+			while(actual->siguiente != nullptr) {
 				actual = actual->siguiente;
 			}
 			actual->siguiente = (NodoRedirect *)nuevo;
 			if((cantHREF - 1 == contador)) {
 				NodoPagina *actual2 = primero;
-				while((NodoPagina *)actual2->abajo != nullptr) {
-					actual2 = (NodoPagina *)actual2->abajo;
+				while(actual2->abajo != nullptr) {
+					actual2 = actual2->abajo;
 				}
 				actual2->siguiente = abajo->siguiente;
 			}
@@ -60,6 +56,7 @@ void ListaEnlazada::Anadir (string Nombre) {
 }
 
 void ListaEnlazada::ImprimirLista () {
+	LimpiarPr ();
 	cout << endl;
 	bool cerrar = true;
 	NodoPagina *actual = (NodoPagina *)primero;
@@ -98,17 +95,18 @@ void ListaEnlazada::ImprimirLista () {
 double ListaEnlazada::calcularPR (int iteracciones,double Resultado,float sobre) {
 	return 	Resultado = (1 - 0.85) + 0.85 * (sobre);
 }
-
+bool exis = true;
 vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec) {
 	Archivo a;
 	vector<string>vec2;
 	NodoRedirect *actual = primero->siguiente;
 	NodoPagina *abajo = primero;
 	bool cerrar = true;
-	if(vec.size()==0) {
+	if(exis) {
 		LimpiarPr ();
 		page = primero;
 		guardar = false;
+		exis = false;
 	} else if(page == nullptr) {
 		return vec;
 	}
@@ -140,10 +138,15 @@ vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec)
 		}
 		actual = actual->siguiente;
 	}
-
 	float PR = 0;
 	double Resultado = 0;
 	cout << "Pagina: " << page->link;
+	if(vec2.size()==0) {
+		int x = a.cantidadHREF (page->link) - 1;
+		PR += (double)1 / x;
+		page->Pr = 0.15;
+		page->Cantidad = 0;
+	}
 	for(int i = 0; i < vec2.size (); i++) {
 		int x = a.cantidadHREF (vec2[i]) - 1;
 		PR += (double)1 / x;
@@ -156,10 +159,19 @@ vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec)
 	return calcularRef (page->abajo,vec);;
 }
 void ListaEnlazada::LimpiarPr () {
+	vector<string>exit;
 	NodoPagina *actual = primero;
+	NodoPagina *tmp = primero;
+	NodoPagina *act = primero;
+	bool existe = true;
 	while(actual != nullptr) {
-		actual->Pr = 0;
+		if(existe) {
+			exit.push_back (actual->link);
+			actual->Pr = 0;
+		}
+		act = actual;
 		actual = actual->abajo;
+
 	}
 }
 void ListaEnlazada::ImprimirPR () {
@@ -172,10 +184,10 @@ void ListaEnlazada::ImprimirPR () {
 
 void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador,int posArreglo) {
 	//Caso Base
-	if(contador == 500) {
-		cout << contador;
+	if(contador == 501||vec.size()==0) {
+		
 		return;
-	}else{
+	} else {
 		page = primero;
 		posArreglo = 0;
 		contador += 1;
@@ -208,6 +220,7 @@ void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador
 			}
 			if(i == vec.size () - 1) {
 				valores[posArreglo] = (double)calcularPR (0,Resultado,PR);
+				//Resultado = 0;
 				posArreglo += 1;
 			}
 		}
@@ -221,64 +234,3 @@ void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador
 	}
 	AjustarPR (page,vec,contador,posArreglo);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*void ListaEnlazada::Anadir (string Nombre) {
-		NodoPagina *nuevo = new NodoPagina (Nombre,nullptr,nullptr);
-		NodoRedirect *_nuevo = new NodoRedirect (Nombre,nullptr);
-		Archivo a;
-		if(activo) {
-			if(estaVacia ()) {
-				cantHREF = a.cantidadHREF (Nombre);
-			} else {
-				cantHREF = a.cantidadHREF (name);
-			}
-			activo = false;
-		}
-
-		if(estaVacia ()) {
-			contador++;
-			abajo = nuevo;
-			siguiente = _nuevo;
-		} else {
-			if(contador < cantHREF) {
-				NodoRedirect *actual = siguiente;
-				while(actual->siguiente != nullptr) {
-					actual = actual->siguiente;
-				}
-				actual->siguiente = _nuevo;
-				contador++;
-			} else {
-				NodoPagina *actual = abajo;
-				while(actual->abajo != nullptr) {
-					actual = actual->abajo;
-				}
-				actual->abajo = nuevo;
-				abajo = actual->abajo;
-				name = nuevo->link;
-				contador = 0;
-				contador++;
-				activo = true;
-			}
-		}
-	}*/
