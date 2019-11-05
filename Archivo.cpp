@@ -6,14 +6,15 @@
 #include <regex>
 #include "Nodo.h"
 #include "ListaEnlazada.h"
+#include <dirent.h>
 using namespace std;
 vector<string>lis;
 bool it = true;
-void Archivo::eiminarDuplicados(string pagina,int contador,ListaEnlazada &ls){
+void Archivo::eiminarDuplicados (string pagina,int contador,ListaEnlazada &ls) {
 	active = true;
 	activo = true;
 	cerrar = true;
-	cout << endl;
+	//cout << endl;
 	auto end = lis.end ();
 	for(auto it = lis.begin (); it != end; ++it) {
 		end = std::remove (it + 1,end,*it);
@@ -22,8 +23,8 @@ void Archivo::eiminarDuplicados(string pagina,int contador,ListaEnlazada &ls){
 	string needle = "href=";
 	string cadena;
 	smatch match;
-	ifstream file (pagina);
-	if(contador < lis.size()) {
+	ifstream file ("C:\\Users\\Mauricio\\source\\repos\\Proyecto_PageRank\\Proyecto_PageRank\\Paginas\\"+pagina);
+	if(contador < lis.size ()) {
 		if(!file.is_open ()) {
 			cout << "Failed to open file!\n";
 			return;
@@ -63,11 +64,11 @@ void Archivo::eiminarDuplicados(string pagina,int contador,ListaEnlazada &ls){
 	active = true;
 	activo = true;
 	cerrar = true;
-	if(lis.size()-1 == contador) {
+	if(lis.size () - 1 == contador) {
 		return;
-	} else{
-			contador+=1;
-			eiminarDuplicados (lis[contador],contador ,ls);
+	} else {
+		contador += 1;
+		eiminarDuplicados (lis[contador],contador,ls);
 	}
 }
 
@@ -76,7 +77,7 @@ void Archivo::LeerArchivo (string pagina,vector<string>lista,int contador,int co
 	string cadena;
 	smatch match;
 	bool crash = true;
-	ifstream file (pagina);
+	ifstream file ("C:\\Users\\Mauricio\\source\\repos\\Proyecto_PageRank\\Proyecto_PageRank\\Paginas\\"+pagina);
 	if(contador < contador2) {
 		if(!file.is_open ()) {
 			cout << "Failed to open file!\n";
@@ -108,23 +109,23 @@ void Archivo::LeerArchivo (string pagina,vector<string>lista,int contador,int co
 			}
 		}
 	} else {
-		return ;
+		return;
 	}
 	//ls.ImprimirLista ();
 	file.close ();
 	active = true;
 	activo = true;
-		cerrar = true;
+	cerrar = true;
 	if(contador2 == 1) {
-		return ;
+		return;
 	} else {
 		LeerArchivo (lista[contador],lista,contador + 1,contador2);
 	}
 
 }
-bool Archivo::existePagina(string pagina){
-	for(int i = 0; i < lis.size(); i++) {
-		if(lis[i]==pagina){
+bool Archivo::existePagina (string pagina) {
+	for(int i = 0; i < lis.size (); i++) {
+		if(lis[i] == pagina) {
 			return false;
 		}
 	}
@@ -134,7 +135,7 @@ int Archivo::cantidadHREF (string pagina) {
 	int contador = 0;
 	string needle = "href=";
 	string cadena;
-	ifstream file (pagina);
+	ifstream file ("C:\\Users\\Mauricio\\source\\repos\\Proyecto_PageRank\\Proyecto_PageRank\\Paginas\\"+pagina);
 	if(!file.is_open ()) {
 		cout << "Failed to open file!\n";
 	} else {
@@ -158,26 +159,35 @@ int Archivo::cantidadHREF (string pagina) {
 }
 vector<string> Archivo::extraerPaginas (string texto) {
 	string cadena;
-	vector<string>paginas = {"instagram.html","whatsapp.html","facebook.html","google.html","youtube.html","amazon.html","twitter.html"};
+	DIR *dir;
+	dir = opendir ("C:\\Users\\Mauricio\\source\\repos\\Proyecto_PageRank\\Proyecto_PageRank\\Paginas");
+	struct dirent *ent;
 	vector<string>pages;
-	for(int i = 0; i < paginas.size (); i++) {
-		ifstream file (paginas[i]);
-		if(!file.is_open ()) {
-			cout << "Failed to open file!\n";
-			break;
-		} else {
-			while(!file.eof ()) {
-				getline (file,cadena);
-				istringstream in (cadena);
-				if(cadena.find (texto) != string::npos) {
-					string line (cadena);
-					regex re ("content=\"(.*)\">");
-					smatch match;
-					if(regex_search (line,match,re)) {
-						pages.push_back (paginas[i]);
+	if(dir == NULL) {
+		cout << "error";
+	}
+	while((ent = readdir (dir)) != NULL) {
+		if((strcmp (ent->d_name,".") != 0) && (strcmp (ent->d_name,"..") != 0)) {
+			ifstream file ("C:\\Users\\Mauricio\\source\\repos\\Proyecto_PageRank\\Proyecto_PageRank\\Paginas\\"+(string)ent->d_name);
+			if(!file.is_open ()) {
+				cout << "Failed to open file!\n";
+				break;
+			} else {
+				while(!file.eof ()) {
+					getline (file,cadena);
+					istringstream in (cadena);
+					if(cadena.find (texto) != string::npos) {
+						string line (cadena);
+						regex re ("content=\"(.*)\">");
+						smatch match;
+						if(regex_search (line,match,re)) {
+							pages.push_back (ent->d_name);
+						}
 					}
 				}
+				//cout << ent->d_name << endl;
 			}
+
 		}
 	}
 	return pages;
