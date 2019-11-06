@@ -21,7 +21,7 @@ public:
 	double calcularPR (int,double,float);
 	void ImprimirLista();
 	vector<string> calcularRef (NodoPagina *,vector<string>&);
-	void ImprimirPR ();
+	void ImprimirPR (string);
 	void AjustarPR (NodoPagina *page,vector<string>&,int,int);
 	void LimpiarPr ();
 
