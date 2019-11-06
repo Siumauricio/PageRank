@@ -27,6 +27,9 @@ struct NodoPagina {
 		Pr = 0;
 		Cantidad = 0;
 	}
+	bool operator() (NodoPagina* i,NodoPagina *j) {
+		return (i->Pr < j->Pr); 
+	}
 	NodoPagina(double _Pr,string _link,NodoPagina*_abajo,NodoRedirect*_siguiente,double cantidad){
 		this->Cantidad = cantidad;
 		this->Pr = _Pr;
@@ -35,4 +38,5 @@ struct NodoPagina {
 		this->siguiente = _siguiente;
 	}
 }; 
+
 
