@@ -2,6 +2,8 @@
 #include "Archivo.h"
 #include <iostream>
 #include "Archivo.h"
+#include <fstream>
+#include <algorithm>
 using namespace std;
 
 ListaEnlazada::ListaEnlazada (void):abajo (nullptr),primero (nullptr) {}
@@ -140,8 +142,8 @@ vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec)
 	}
 	float PR = 0;
 	double Resultado = 0;
-	cout << "Pagina: " << page->link;
-	if(vec2.size()==0) {
+	//cout << "Pagina: " << page->link;
+	if(vec2.size () == 0) {
 		int x = a.cantidadHREF (page->link) - 1;
 		PR += (double)1 / x;
 		page->Pr = 0.15;
@@ -174,25 +176,44 @@ void ListaEnlazada::LimpiarPr () {
 
 	}
 }
-void ListaEnlazada::ImprimirPR () {
+void ListaEnlazada::ImprimirPR (string palabra) {
+	ofstream archivo;
 	NodoPagina *actual = primero;
+	vector<NodoPagina*>ordenar;
+	
+	int variable = 0;
 	while(actual != nullptr) {
-		cout << "Pagina: " << actual->link << " PR: " << actual->Pr << " Enlaces Salientes: " << actual->Cantidad << endl;
+		//cout<<"<li><a href = "<<actual->link<<"><"< / a>< / li>
+		ordenar.push_back (actual);
+		//cout << "<h2>Pagina: "<< actual->link << " PR: " << actual->Pr << " Enlaces Salientes: " << actual->Cantidad << "</h2>"<<endl;
+		///cout << "<a href=\"" << actual->link << "\"> " << actual->link << " </a>" << endl;
 		actual = actual->abajo;
 	}
-}
+	archivo.open ("Enlaces.html",ios::app);
 
+	std::sort (ordenar.begin (),ordenar.end (),[](const NodoPagina *left,const NodoPagina *right) { return (left->Pr > right->Pr); });
+	
+	archivo << "Palabra Buscada: "<<palabra<<endl;
+	for(int i = 0; i < ordenar.size(); i++) {
+		archivo << "Pagina: "<<ordenar[i]->link << " PR: " << ordenar[i]->Pr << endl;
+		cout << "<h2>Pagina: " << ordenar[i]->link << " PR: " << ordenar[i]->Pr <<  "</h2>" << endl;
+		cout << "<a href=\"" << ordenar[i]->link << "\"> " << ordenar[i]->link << " </a>" << endl;
+	}
+	archivo << endl;
+	archivo.close ();
+
+}
+array<double,100>valores;
 void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador,int posArreglo) {
 	//Caso Base
-	if(contador == 501||vec.size()==0) {
-		
+	if(contador == 10 || vec.size () == 0) {
 		return;
 	} else {
 		page = primero;
 		posArreglo = 0;
 		contador += 1;
 		Archivo a;
-		array<double,100>valores;
+
 		NodoPagina *tmp = primero;
 		float PR = 0;
 		double Resultado = 0;
