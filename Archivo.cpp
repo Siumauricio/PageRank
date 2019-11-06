@@ -175,6 +175,12 @@ vector<string> Archivo::extraerPaginas (string texto) {
 			} else {
 				while(!file.eof ()) {
 					getline (file,cadena);
+					std::for_each (cadena.begin (),cadena.end (),[](char &c) {
+						c = ::tolower (c);
+					});
+					std::for_each (texto.begin (),texto.end (),[](char &c) {
+						c = ::tolower (c);
+					});
 					istringstream in (cadena);
 					if(cadena.find (texto) != string::npos) {
 						string line (cadena);
