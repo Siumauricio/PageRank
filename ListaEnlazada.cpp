@@ -8,6 +8,27 @@ using namespace std;
 
 ListaEnlazada::ListaEnlazada (void):abajo (nullptr),primero (nullptr) {}
 
+ListaEnlazada::ListaEnlazada (string pagina) {
+	bool abrir = false;
+	Archivo a;
+	vector<string>lista;
+	vector<string>lista3;
+	vector<string>TotalCoincidencia;
+	ListaEnlazada ls;
+	//cout << "Palabra: " << argv[1] << endl;
+	lista = a.extraerPaginas (pagina);
+	for(int i = 0; i < lista.size (); i++) {
+		a.LeerArchivo (lista[i],lista3,0,a.cantidadHREF (lista[i]));
+		abrir = true;
+	}
+	if(abrir) {
+		a.eiminarDuplicados (lista[0],0,ls);
+		ls.calcularRef (nullptr,TotalCoincidencia);
+		ls.AjustarPR (nullptr,TotalCoincidencia,0,0);
+		cout << "<h1>\t\tPAGERANK </h1>" << endl;
+		ls.ImprimirPR (pagina);
+	}
+}
 bool ListaEnlazada::estaVacia () {
 	return abajo == nullptr;
 }
@@ -56,52 +77,13 @@ void ListaEnlazada::Anadir (string Nombre) {
 		}
 	}
 }
-
-void ListaEnlazada::ImprimirLista () {
-	LimpiarPr ();
-	cout << endl;
-	bool cerrar = true;
-	NodoPagina *actual = (NodoPagina *)primero;
-	NodoRedirect *tmp = (NodoRedirect *)primero->siguiente;
-	while(tmp != nullptr) {
-		if(cerrar) {
-			cerrar = false;
-			cout << "[" << actual->link << "]";
-			actual = actual->abajo;
-			actual = primero;
-		}
-		if(actual->siguiente != nullptr) {
-			cout << "->";
-		}
-		cout << "[" << tmp->link << "]";
-		tmp = tmp->siguiente;
-		if(tmp == nullptr) {
-			if(actual->abajo == nullptr) {
-				return;
-			}
-			actual = actual->abajo;
-			cout << endl;
-			cout << "[" << actual->link << "]";
-			tmp = actual->siguiente;
-			if(tmp == nullptr) {
-				actual = actual->abajo;
-				cout << endl;
-				cout << "[" << actual->link << "]";
-				tmp = actual->siguiente;
-			}
-		}
-	}
-	cout << endl;
-}
-
-double ListaEnlazada::calcularPR (int iteracciones,double Resultado,float sobre) {
+double ListaEnlazada::calcularPR (double Resultado,float sobre) {
 	return 	Resultado = (1 - 0.85) + 0.85 * (sobre);
 }
-bool exis = true;
-vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec) {
+vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &TotalCoincidencia) {
 	Archivo a;
-	vector<string>vec2;
-	NodoRedirect *actual = primero->siguiente;
+	vector<string>Coincidencia;
+	NodoRedirect *Siguiente = primero->siguiente;
 	NodoPagina *abajo = primero;
 	bool cerrar = true;
 	if(exis) {
@@ -110,10 +92,10 @@ vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec)
 		guardar = false;
 		exis = false;
 	} else if(page == nullptr) {
-		return vec;
+		return TotalCoincidencia;
 	}
 	while(abajo != nullptr) {
-		if(actual == nullptr) {
+		if(Siguiente == nullptr) {
 			abajo = abajo->abajo;
 			if(abajo == nullptr) {
 				cerrar = false;
@@ -130,98 +112,76 @@ vector<string> ListaEnlazada::calcularRef (NodoPagina *page,vector<string> &vec)
 				if(abajo == nullptr) {
 					break;
 				} else {
-					actual = abajo->siguiente;
+					Siguiente = abajo->siguiente;
 				}
 			}
 		}
-		if(actual->link == page->link && cerrar) {
-			vec.push_back (abajo->link);
-			vec2.push_back (abajo->link);
+		if(Siguiente->link == page->link && cerrar) {
+			TotalCoincidencia.push_back (abajo->link);
+			Coincidencia.push_back (abajo->link);
 		}
-		actual = actual->siguiente;
+		Siguiente = Siguiente->siguiente;
 	}
 	float PR = 0;
 	double Resultado = 0;
-	//cout << "Pagina: " << page->link;
-	if(vec2.size () == 0) {
-		int x = a.cantidadHREF (page->link) - 1;
-		PR += (double)1 / x;
+	int x = 0;
+	if(Coincidencia.size () == 0) {
 		page->Pr = 0.15;
 		page->Cantidad = 0;
-	}
-	for(int i = 0; i < vec2.size (); i++) {
-		int x = a.cantidadHREF (vec2[i]) - 1;
-		PR += (double)1 / x;
-		if(vec2.size () - 1 == i) {
-			page->Pr = calcularPR (0,Resultado,PR);
-			page->Cantidad = vec2.size ();
+	}else{
+		for(int i = 0; i < Coincidencia.size (); i++) {
+			x = a.cantidadHREF (Coincidencia[i]) - 1;
+			PR += (double)1 / x;
 		}
+		page->Pr = calcularPR (Resultado,PR);
+		page->Cantidad = Coincidencia.size ();
 	}
 	cout << endl;
-	return calcularRef (page->abajo,vec);;
+	return calcularRef (page->abajo,TotalCoincidencia);;
 }
 void ListaEnlazada::LimpiarPr () {
-	vector<string>exit;
 	NodoPagina *actual = primero;
-	NodoPagina *tmp = primero;
-	NodoPagina *act = primero;
-	bool existe = true;
 	while(actual != nullptr) {
-		if(existe) {
-			exit.push_back (actual->link);
-			actual->Pr = 0;
-		}
-		act = actual;
+		actual->Pr = 0;
 		actual = actual->abajo;
-
 	}
 }
 void ListaEnlazada::ImprimirPR (string palabra) {
 	ofstream archivo;
 	NodoPagina *actual = primero;
-	vector<NodoPagina*>ordenar;
-	
-	int variable = 0;
+	vector<NodoPagina *>ordenar;
 	while(actual != nullptr) {
-		//cout<<"<li><a href = "<<actual->link<<"><"< / a>< / li>
 		ordenar.push_back (actual);
-		//cout << "<h2>Pagina: "<< actual->link << " PR: " << actual->Pr << " Enlaces Salientes: " << actual->Cantidad << "</h2>"<<endl;
-		///cout << "<a href=\"" << actual->link << "\"> " << actual->link << " </a>" << endl;
 		actual = actual->abajo;
 	}
 	archivo.open ("Enlaces.html",ios::app);
-
-	std::sort (ordenar.begin (),ordenar.end (),[](const NodoPagina *left,const NodoPagina *right) { return (left->Pr > right->Pr); });
-	
-	archivo << "Palabra Buscada: "<<palabra<<endl;
-	for(int i = 0; i < ordenar.size(); i++) {
-		archivo << "Pagina: "<<ordenar[i]->link << " PR: " << ordenar[i]->Pr << endl;
-		cout << "<h2>Pagina: " << ordenar[i]->link << " PR: " << ordenar[i]->Pr <<  "</h2>" << endl;
+	sort (ordenar.begin (),ordenar.end (),[](const NodoPagina *left,const NodoPagina *right) { return (left->Pr > right->Pr); });
+	archivo << "Palabra Buscada: " << palabra << endl;
+	for(int i = 0; i < ordenar.size (); i++) {
+		archivo << "Pagina: " << ordenar[i]->link << " PR: " << ordenar[i]->Pr << endl;
+		cout << "<h2>Pagina: " << ordenar[i]->link << " " << ordenar[i]->Pr << "</h2>" << endl;
 		cout << "<a href=\"" << ordenar[i]->link << "\"> " << ordenar[i]->link << " </a>" << endl;
 	}
 	archivo << endl;
 	archivo.close ();
-
 }
-array<double,100>valores;
-void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador,int posArreglo) {
+void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &TotalCoincidencia,int contador,int posArreglo) {
 	//Caso Base
-	if(contador == 10 || vec.size () == 0) {
+	if(contador == 100 || TotalCoincidencia.size () == 0) {
 		return;
 	} else {
 		page = primero;
 		posArreglo = 0;
-		contador += 1;
 		Archivo a;
-
 		NodoPagina *tmp = primero;
 		float PR = 0;
 		double Resultado = 0;
 		int cantidadElementos = 0;
-		for(int i = 0; i < vec.size (); i++) {
-			int x = a.cantidadHREF (vec[i]) - 1;
+		int x = 0;
+		for(int i = 0; i < TotalCoincidencia.size (); i++) {
+			x = a.cantidadHREF (TotalCoincidencia[i]) - 1;
 			if(page->Cantidad == cantidadElementos) {
-				valores[posArreglo] = (double)calcularPR (0,Resultado,PR);
+				valores[posArreglo] = (double)calcularPR (Resultado,PR);
 				posArreglo += 1;
 				cantidadElementos = 0;
 				page = page->abajo;
@@ -230,7 +190,7 @@ void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador
 				Resultado = 0;
 			} else {
 				while(tmp != nullptr) {
-					if(tmp->link == vec[i]) {
+					if(tmp->link == TotalCoincidencia[i]) {
 						PR += tmp->Pr / x;
 						break;
 					}
@@ -239,19 +199,18 @@ void ListaEnlazada::AjustarPR (NodoPagina *page,vector<string> &vec,int contador
 				tmp = primero;
 				cantidadElementos++;
 			}
-			if(i == vec.size () - 1) {
-				valores[posArreglo] = (double)calcularPR (0,Resultado,PR);
-				//Resultado = 0;
+			if(i == TotalCoincidencia.size () - 1) {
+				valores[posArreglo] = (double)calcularPR (Resultado,PR);
 				posArreglo += 1;
 			}
 		}
 		NodoPagina *SetPr = primero;
-		int x = 0;
+		int posicion = 0;
 		while(SetPr != nullptr) {
-			SetPr->Pr = valores[x];
+			SetPr->Pr = valores[posicion];
 			SetPr = SetPr->abajo;
-			x++;
+			posicion++;
 		}
 	}
-	AjustarPR (page,vec,contador,posArreglo);
+	AjustarPR (page,TotalCoincidencia,contador+1,posArreglo);
 }
