@@ -38,5 +38,3 @@ struct NodoPagina {
 		this->siguiente = _siguiente;
 	}
 }; 
-
-
