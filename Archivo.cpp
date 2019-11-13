@@ -8,8 +8,7 @@
 #include "ListaEnlazada.h"
 #include <dirent.h>
 using namespace std;
-vector<string>lis;
-bool it = true;
+
 void Archivo::eiminarDuplicados (string pagina,int contador,ListaEnlazada &ls) {
 	active = true;
 	activo = true;
