@@ -16,6 +16,8 @@ public:
 	bool existePagina (string);
 	vector<string> extraerPaginas (string);
 	void eiminarDuplicados (string pagina,int contador,ListaEnlazada &);
+	vector<string>lis;
+	bool it = true;
 private:
 	//ListaEnlazada ls;
 	bool activo = true;
